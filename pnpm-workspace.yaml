@@ -1,0 +1,6 @@
+# pnpm workspace configuration (optional)
+# This project is a single app, but this file ensures pnpm works optimally
+
+packages:
+  - '.'
+

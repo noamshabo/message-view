@@ -1,0 +1,16 @@
+# NocoDB Configuration - UPDATED for NocoDB Cloud
+# Copy this to .env.local and fill in your values
+
+# Your NocoDB instance URL (for NocoDB Cloud use: https://app.nocodb.com)
+NC_BASE_URL=https://app.nocodb.com
+
+# Your NocoDB Base/Workspace ID (find in browser URL after /nc/)
+# Example: if URL is https://app.nocodb.com/nc/p1a2b3c4d5 then use p1a2b3c4d5
+NC_BASE_ID=YOUR_BASE_ID
+
+# Your Table ID (NOT the table name - right-click table and "Copy ID")
+# Example: m7x8y9z0a1 (usually starts with 'm')
+NC_TABLE_ID=YOUR_TABLE_ID
+
+# Your API token (get from: Profile → Account Settings → API Tokens)
+NC_TOKEN=YOUR_XC_TOKEN
