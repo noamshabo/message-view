@@ -103,11 +103,11 @@ export default function Home() {
               disabled={isRefreshing || loading}
               className="px-3 md:px-5 py-2 md:py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none font-medium text-sm md:text-base"
             >
-              <div className="flex items-center space-x-1.5 md:space-x-2 space-x-reverse">
+              <div className="flex items-center gap-2 md:gap-2.5">
+                <span className="hidden sm:inline">{isRefreshing ? "מרענן..." : "רענן"}</span>
                 <svg className={`w-4 h-4 md:w-5 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="hidden sm:inline">{isRefreshing ? "מרענן..." : "רענן"}</span>
               </div>
             </button>
           </div>
