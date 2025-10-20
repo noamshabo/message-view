@@ -3,7 +3,8 @@ import Google from "next-auth/providers/google";
 
 // רשימת אימיילים מותרים - הוסף כאן את האימיילים שרק להם תהיה גישה
 const ALLOWED_EMAILS = [
-  "noamshabo1@gmail.com", // החלף בכתובות האימייל שלך
+  "noamshabo1@gmail.com",
+  "elad@bizsuccess.co.il" // החלף בכתובות האימייל שלך
   // הוסף עוד אימיילים כאן
 ];
 
