@@ -8,22 +8,27 @@ export default function SignIn() {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl max-w-md w-full mx-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             ברוכים הבאים
           </h1>
-          <p className="text-gray-600">
-            התחבר כדי לצפות בשיחות
+          <p className="text-gray-600 text-sm md:text-base">
+            התחבר עם Google כדי לצפות בשיחות
           </p>
         </div>
         
         <button
           onClick={() => signIn("google", { callbackUrl })}
-          className="w-full bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center justify-center gap-3 shadow-sm"
+          className="group w-full bg-white border-2 border-gray-200 text-gray-700 px-6 py-4 rounded-xl font-semibold hover:border-blue-400 hover:shadow-lg hover:shadow-blue-100 transition-all duration-300 flex items-center justify-center gap-3 shadow-md hover:scale-[1.02] active:scale-[0.98]"
         >
-          <svg className="w-6 h-6" viewBox="0 0 24 24">
+          <svg className="w-7 h-7 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -41,11 +46,16 @@ export default function SignIn() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          התחבר עם Google
+          <span className="text-base md:text-lg">התחבר עם Google</span>
         </button>
         
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>רק משתמשים מורשים יכולים להתחבר</p>
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
+            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span className="text-xs md:text-sm text-blue-700 font-medium">רק משתמשים מורשים</span>
+          </div>
         </div>
       </div>
     </div>

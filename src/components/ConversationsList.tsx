@@ -99,7 +99,7 @@ export default function ConversationsList({
   };
 
   return (
-    <div className={`w-full md:w-96 bg-white border-r border-gray-200 flex flex-col shadow-modern-lg ${className}`} dir="rtl">
+    <div className={`w-full md:w-[450px] bg-white border-r border-gray-200 flex flex-col shadow-modern-lg ${className}`} dir="rtl">
       {/* Search Box */}
       <div className="p-3 md:p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200">
         <div className="relative">
@@ -143,7 +143,7 @@ export default function ConversationsList({
                 animation: `slideIn 0.3s ease-out ${index * 0.05}s both`
               }}
             >
-              <div className="flex items-center space-x-2 md:space-x-3 space-x-reverse">
+              <div className="flex items-center gap-3 md:gap-4">
                 {/* Avatar */}
                 <div className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg shadow-lg flex-shrink-0 ${
                   selected === conv.conversation_id

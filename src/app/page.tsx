@@ -165,7 +165,7 @@ export default function Home() {
                   {/* Conversation Header */}
                   {conversationDetails && (
                     <div className="bg-white border-b border-gray-200 px-3 md:px-6 py-3 md:py-4 shadow-md">
-                      <div className="flex items-center space-x-2 md:space-x-4 space-x-reverse">
+                      <div className="flex items-center gap-4 md:gap-5">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                           <span className="text-white font-bold text-base md:text-lg">
                             {(conversationDetails.customer_name || conversationDetails.customer_phone).charAt(0)}
