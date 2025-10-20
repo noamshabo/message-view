@@ -52,7 +52,7 @@ export default function Chat({ items }: ChatProps) {
 
   return (
     <div 
-      className="flex-1 overflow-y-auto p-6 space-y-3" 
+      className="flex-1 overflow-y-auto p-3 md:p-6 space-y-2 md:space-y-3" 
       style={{
         background: 'linear-gradient(to bottom, #f9fafb 0%, #f3f4f6 100%)',
         backgroundImage: `
@@ -70,20 +70,20 @@ export default function Chat({ items }: ChatProps) {
             className={`flex ${isIncoming ? "justify-start" : "justify-end"}`}
           >
             <div
-              className={`max-w-[75%] rounded-2xl px-5 py-3 shadow-lg message-bubble ${
+              className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3 md:px-5 py-2 md:py-3 shadow-lg message-bubble ${
                 isIncoming
                   ? "bg-white text-gray-900"
                   : "bg-gradient-to-br from-purple-500 to-pink-500 text-white"
               }`}
             >
               {/* Message content */}
-              <div className="whitespace-pre-wrap break-words leading-relaxed">
+              <div className="whitespace-pre-wrap break-words leading-relaxed text-sm md:text-base">
                 {msg.content}
               </div>
               
               {/* Timestamp and status */}
               <div
-                className={`flex items-center justify-end mt-2 text-xs space-x-1 space-x-reverse ${
+                className={`flex items-center justify-end mt-1.5 md:mt-2 text-[10px] md:text-xs space-x-1 space-x-reverse ${
                   isIncoming ? "text-gray-500" : "text-white/80"
                 }`}
               >
@@ -92,7 +92,7 @@ export default function Chat({ items }: ChatProps) {
                 </svg>
                 <span>{formatTimestamp(msg.CreatedAt)}</span>
                 {!isIncoming && (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
