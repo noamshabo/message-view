@@ -14,3 +14,16 @@ NC_TABLE_ID=YOUR_TABLE_ID
 
 # Your API token (get from: Profile → Account Settings → API Tokens)
 NC_TOKEN=YOUR_XC_TOKEN
+
+# NextAuth Configuration
+# CRITICAL: Must be set in Vercel Environment Variables!
+# For local: http://localhost:3000
+# For production: https://your-domain.vercel.app (NO trailing slash!)
+NEXTAUTH_URL=http://localhost:3000
+
+# Generate with: openssl rand -base64 32
+AUTH_SECRET=YOUR_AUTH_SECRET_HERE
+
+# Google OAuth (get from Google Cloud Console)
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
