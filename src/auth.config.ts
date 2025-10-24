@@ -27,6 +27,18 @@ export const authConfig = {
       console.log(`Access denied for email: ${user.email}`);
       return false;
     },
+    async redirect({ url, baseUrl }) {
+      // אם ה-URL מתחיל עם slash, זה נתיב יחסי - הוסף את ה-baseUrl
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      // אם ה-URL הוא באותו דומיין כמו baseUrl, החזר אותו
+      else if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      // אחרת, החזר לדף הבית
+      return baseUrl;
+    },
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnConversation = nextUrl.pathname.startsWith("/conversation");
