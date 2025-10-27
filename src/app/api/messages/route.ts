@@ -48,50 +48,42 @@ export async function GET(request: NextRequest) {
 
     // Parse query params
     const searchParams = request.nextUrl.searchParams;
-    const requestedLimit = searchParams.get("limit") || "1000"; // High limit to get full week
     const conversationId = searchParams.get("conversationId");
     const whereParam = searchParams.get("where");
     
-    // Week-based pagination: weeksBack=0 means current week, weeksBack=1 means last week, etc.
+    // Simple pagination: weeksBack=0 means records 0-499, weeksBack=1 means 500-999, etc.
     const weeksBackParam = searchParams.get("weeksBack") || "0";
     const weeksBack = parseInt(weeksBackParam);
 
     // Build NocoDB API URL - Correct format for NocoDB Cloud
     const baseUrl = NC_BASE_URL.replace(/\/$/, ""); // Remove trailing slash
     
-    // Calculate date range for the requested week (for client-side filtering)
-    // Week 0 = current week (last 7 days from now)
-    // Week 1 = week before that (8-14 days ago)
-    // Week 2 = week before that (15-21 days ago), etc.
-    const now = new Date();
-    const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() - (weeksBack * 7));
+    // Calculate base offset for this page
+    const RECORDS_PER_PAGE = 500;
+    const baseOffset = weeksBack * RECORDS_PER_PAGE;
     
-    const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - 7);
-    
-    // NocoDB returns 100 records per request by default
-    // We'll fetch multiple batches to get the full week
-    const NOCODB_PAGE_SIZE = 100;
-    const desiredRecords = parseInt(requestedLimit);
-    const batches = Math.ceil(desiredRecords / NOCODB_PAGE_SIZE);
+    // NocoDB limit per request
+    const NOCODB_BATCH_SIZE = 100;
+    const BATCHES_PER_PAGE = 5; // 5 batches × 100 = 500 records
     
     let allRecords: NocoDBRecord[] = [];
-    let currentOffset = 0;
-    let hasMoreData = true;
-
-    // Fetch records in batches
-    for (let i = 0; i < batches && hasMoreData; i++) {
+    
+    // Fetch 5 batches of 100 records each
+    for (let i = 0; i < BATCHES_PER_PAGE; i++) {
+      // Add delay between requests to avoid rate limiting (except for first request)
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
+      }
+      
+      const currentOffset = baseOffset + (i * NOCODB_BATCH_SIZE);
+      
       // NocoDB v2 API: /api/v2/tables/{tableId}/records
       const apiUrl = new URL(`/api/v2/tables/${NC_TABLE_ID}/records`, baseUrl);
-
-      // Add query parameters - NocoDB uses its own pagination
-      apiUrl.searchParams.set("limit", NOCODB_PAGE_SIZE.toString());
-      apiUrl.searchParams.set("offset", currentOffset.toString());
       
-      // NocoDB v2 uses fields for sorting
+      apiUrl.searchParams.set("limit", NOCODB_BATCH_SIZE.toString());
+      apiUrl.searchParams.set("offset", currentOffset.toString());
       apiUrl.searchParams.set("sort", "-CreatedAt"); // Sort by CreatedAt desc
-
+      
       // Add custom where clause if provided
       if (whereParam) {
         apiUrl.searchParams.set("where", whereParam);
@@ -119,15 +111,20 @@ export async function GET(request: NextRequest) {
             details: errorText,
             url: apiUrl.toString(),
             troubleshooting: {
-              message: "The API endpoint returned an error. Please check:",
-              steps: [
-                "1. Verify NC_BASE_URL is correct (e.g., https://app.nocodb.com)",
-                "2. Verify NC_TABLE_ID is the correct table ID (not table name)",
-                "3. Get table ID from: Right-click table → Copy ID, or from browser URL",
-                "4. Verify your API token has read permissions for this table",
-                "5. Check that the table actually exists in your NocoDB workspace"
-              ],
-              hint: "For NocoDB cloud, you need the TABLE ID (like 'm123abc'), not the table name"
+              message: response.status === 429 
+                ? "Rate limit exceeded. Too many requests to NocoDB."
+                : "The API endpoint returned an error. Please check:",
+              steps: response.status === 429
+                ? [
+                    "1. NocoDB has rate limits on free/cloud plans",
+                    "2. Wait a few seconds and try again",
+                    "3. Consider upgrading your NocoDB plan for higher limits"
+                  ]
+                : [
+                    "1. Verify NC_BASE_URL is correct (e.g., https://app.nocodb.com)",
+                    "2. Verify NC_TABLE_ID is the correct table ID (not table name)",
+                    "3. Verify your API token has read permissions for this table"
+                  ]
             }
           },
           { status: response.status }
@@ -156,16 +153,13 @@ export async function GET(request: NextRequest) {
         );
       }
       
-      // Add to accumulated records
+      // Add batch records to all records
       allRecords = allRecords.concat(batchRecords);
       
-      // Check if we got fewer records than expected (reached the end)
-      if (batchRecords.length < NOCODB_PAGE_SIZE) {
-        hasMoreData = false;
+      // If we got fewer records than requested, we've reached the end
+      if (batchRecords.length < NOCODB_BATCH_SIZE) {
+        break; // Stop fetching more batches
       }
-      
-      // Move to next offset
-      currentOffset += batchRecords.length;
     }
 
     const records = allRecords;
@@ -179,31 +173,19 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Filter by date range (client-side) if NOT requesting a specific conversation
-    if (!conversationId) {
-      messagesWithConvId = messagesWithConvId.filter((msg) => {
-        const msgDate = new Date(msg.CreatedAt);
-        return msgDate >= startDate && msgDate <= endDate;
-      });
-    }
-
-    // Filter by conversationId if provided
+    // Filter by conversationId if provided (for specific conversation view)
     if (conversationId) {
       messagesWithConvId = messagesWithConvId.filter(
         (msg) => msg.conversation_id === conversationId
       );
     }
     
-    // Return data with metadata for week-based pagination
+    // Return data with simple pagination metadata
     return NextResponse.json({
       data: messagesWithConvId,
-      hasMore: conversationId ? false : (messagesWithConvId.length > 0), // No pagination for specific conversation
-      nextWeeksBack: weeksBack + 1, // Next request should fetch the previous week
+      hasMore: conversationId ? false : (records.length >= RECORDS_PER_PAGE), // If we got 500 records, there might be more
+      nextWeeksBack: weeksBack + 1, // Next page
       currentWeek: weeksBack,
-      dateRange: conversationId ? null : {
-        start: startDate.toISOString(),
-        end: endDate.toISOString()
-      },
       count: messagesWithConvId.length,
     });
   } catch (error) {
