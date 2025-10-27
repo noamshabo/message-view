@@ -24,7 +24,6 @@ export const authConfig = {
       }
       
       // אם האימייל לא ברשימה, מנע כניסה
-      console.log(`Access denied for email: ${user.email}`);
       return false;
     },
     async redirect({ url, baseUrl }) {

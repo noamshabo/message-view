@@ -13,12 +13,18 @@ export default function Home() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
+  
+  // Pagination state
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
 
-  // Fetch messages from API
+  // Fetch messages from API (initial load)
   const fetchMessages = async () => {
     try {
       setError(null);
-      const response = await fetch("/api/messages?limit=500");
+      
+      const response = await fetch("/api/messages?limit=300&offset=0");
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -27,10 +33,13 @@ export default function Home() {
         );
       }
       
-      const data = await response.json();
-      setMessages(data);
+      const result = await response.json();
+      
+      setMessages(result.data);
+      setHasMore(result.hasMore);
+      setOffset(result.nextOffset);
     } catch (err) {
-      console.error("❌ Error fetching messages:", err);
+      console.error("❌ [CLIENT] שגיאה בטעינת הודעות:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch messages");
     } finally {
       setLoading(false);
@@ -43,9 +52,41 @@ export default function Home() {
     fetchMessages();
   }, []);
 
+  // Load more messages (for infinite scroll)
+  const loadMore = async () => {
+    if (!hasMore || isLoadingMore) return;
+    
+    try {
+      setIsLoadingMore(true);
+      
+      const response = await fetch(`/api/messages?limit=300&offset=${offset}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+      
+      const result = await response.json();
+      
+      // Append new messages to existing ones
+      setMessages((prev) => [...prev, ...result.data]);
+      setHasMore(result.hasMore);
+      setOffset(result.nextOffset);
+    } catch (err) {
+      console.error("❌ [CLIENT] שגיאה בטעינת הודעות נוספות:", err);
+      // Don't set error state for loadMore failures, just log them
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   // Handle refresh
   const handleRefresh = () => {
     setIsRefreshing(true);
+    setOffset(0);
+    setHasMore(true);
     fetchMessages();
   };
 
@@ -71,9 +112,9 @@ export default function Home() {
     : null;
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-gray-100" dir="rtl">
+    <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-purple-50 to-gray-100" dir="rtl">
       {/* Header */}
-      <header className="gradient-header shadow-modern-lg">
+      <header className="gradient-header shadow-modern-lg flex-shrink-0">
         <div className="px-3 md:px-6 py-3 md:py-5 flex items-center justify-between">
           <div className="flex items-center space-x-2 md:space-x-3 space-x-reverse">
             {/* Back button on mobile when chat is open */}
@@ -98,25 +139,35 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <UserMenu />
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing || loading}
-              className="px-3 md:px-5 py-2 md:py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none font-medium text-sm md:text-base"
-            >
-              <div className="flex items-center gap-2 md:gap-2.5">
-                <span className="hidden sm:inline">{isRefreshing ? "מרענן..." : "רענן"}</span>
-                <svg className={`w-4 h-4 md:w-5 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </div>
-            </button>
+            <div className="flex items-center gap-2 md:gap-3">
+              {messages.length > 0 && (
+                <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-xl text-white text-sm font-medium">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  <span>{messages.length} הודעות</span>
+                </div>
+              )}
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing || loading}
+                className="px-3 md:px-5 py-2 md:py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none font-medium text-sm md:text-base"
+              >
+                <div className="flex items-center gap-2 md:gap-2.5">
+                  <span className="hidden sm:inline">{isRefreshing ? "מרענן..." : "רענן"}</span>
+                  <svg className={`w-4 h-4 md:w-5 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-gradient-to-r from-red-50 to-pink-50 border-b border-red-200 px-3 md:px-6 py-3 md:py-4 animate-slide-in">
+        <div className="bg-gradient-to-r from-red-50 to-pink-50 border-b border-red-200 px-3 md:px-6 py-3 md:py-4 animate-slide-in flex-shrink-0">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center space-x-2 md:space-x-3 space-x-reverse">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -140,7 +191,7 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {loading ? (
           <div className="flex items-center justify-center w-full">
             <div className="text-center">
@@ -156,15 +207,18 @@ export default function Home() {
               onSelect={handleSelectConversation}
               selected={selectedConversationId || undefined}
               className={`${showMobileChat ? 'hidden md:flex' : 'flex'}`}
+              onLoadMore={loadMore}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
             />
 
             {/* Left Panel - Chat View */}
-            <div className={`flex-1 flex-col ${showMobileChat ? 'flex' : 'hidden md:flex'}`} dir="rtl">
+            <div className={`flex-1 flex-col min-h-0 ${showMobileChat ? 'flex' : 'hidden md:flex'}`} dir="rtl">
               {selectedConversationId ? (
                 <>
                   {/* Conversation Header */}
                   {conversationDetails && (
-                    <div className="bg-white border-b border-gray-200 px-3 md:px-6 py-3 md:py-4 shadow-md">
+                    <div className="bg-white border-b border-gray-200 px-3 md:px-6 py-3 md:py-4 shadow-md flex-shrink-0">
                       <div className="flex items-center gap-4 md:gap-5">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                           <span className="text-white font-bold text-base md:text-lg">

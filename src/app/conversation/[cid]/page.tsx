@@ -15,12 +15,18 @@ export default function ConversationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Pagination state
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
 
-  // Fetch messages from API
+  // Fetch messages from API (initial load)
   const fetchMessages = async () => {
     try {
       setError(null);
-      const response = await fetch("/api/messages?limit=500");
+      
+      const response = await fetch("/api/messages?limit=300&offset=0");
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -29,14 +35,42 @@ export default function ConversationPage() {
         );
       }
       
-      const data = await response.json();
-      setMessages(data);
+      const result = await response.json();
+      
+      setMessages(result.data);
+      setHasMore(result.hasMore);
+      setOffset(result.nextOffset);
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      console.error("❌ [CLIENT] שגיאה בטעינת הודעות:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch messages");
     } finally {
       setLoading(false);
       setIsRefreshing(false);
+    }
+  };
+
+  // Load more messages
+  const loadMore = async () => {
+    if (!hasMore || isLoadingMore) return;
+    
+    try {
+      setIsLoadingMore(true);
+      
+      const response = await fetch(`/api/messages?limit=300&offset=${offset}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      setMessages((prev) => [...prev, ...result.data]);
+      setHasMore(result.hasMore);
+      setOffset(result.nextOffset);
+    } catch (err) {
+      console.error("❌ [CLIENT] שגיאה בטעינת הודעות נוספות:", err);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
@@ -48,6 +82,8 @@ export default function ConversationPage() {
   // Handle refresh
   const handleRefresh = () => {
     setIsRefreshing(true);
+    setOffset(0);
+    setHasMore(true);
     fetchMessages();
   };
 
@@ -72,9 +108,9 @@ export default function ConversationPage() {
     : null;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -112,7 +148,7 @@ export default function ConversationPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-red-50 border-b border-red-200 px-6 py-3">
+        <div className="bg-red-50 border-b border-red-200 px-6 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <svg
@@ -139,7 +175,7 @@ export default function ConversationPage() {
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {loading ? (
           <div className="flex items-center justify-center w-full">
             <div className="text-center">
@@ -154,14 +190,17 @@ export default function ConversationPage() {
               messages={messages}
               onSelect={handleSelectConversation}
               selected={conversationId}
+              onLoadMore={loadMore}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
             />
 
             {/* Right Panel - Chat View */}
-            <div className="flex-1 flex flex-col bg-white">
+            <div className="flex-1 flex flex-col bg-white min-h-0">
               {conversationDetails ? (
                 <>
                   {/* Conversation Header */}
-                  <div className="border-b border-gray-200 px-6 py-4 bg-gray-50">
+                  <div className="border-b border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900">
                       {conversationDetails.customer_name || conversationDetails.customer_phone}
                     </h2>

@@ -52,8 +52,9 @@ export default function Chat({ items }: ChatProps) {
 
   return (
     <div 
-      className="flex-1 overflow-y-auto p-3 md:p-6 space-y-2 md:space-y-3" 
+      className="flex-1 overflow-y-auto p-3 md:p-6 space-y-2 md:space-y-3 min-h-0" 
       style={{
+        WebkitOverflowScrolling: 'touch',
         background: 'linear-gradient(to bottom, #f9fafb 0%, #f3f4f6 100%)',
         backgroundImage: `
           radial-gradient(circle at 20% 50%, rgba(167, 139, 250, 0.03) 0%, transparent 50%),
