@@ -14,17 +14,18 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
   
-  // Pagination state
+  // Week-based pagination state
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const [weeksBack, setWeeksBack] = useState(0); // 0 = current week, 1 = last week, etc.
 
   // Fetch messages from API (initial load)
   const fetchMessages = async () => {
     try {
       setError(null);
       
-      const response = await fetch("/api/messages?limit=300&offset=0");
+      // Start with week 0 (current week = last 7 days)
+      const response = await fetch("/api/messages?weeksBack=0");
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -37,7 +38,7 @@ export default function Home() {
       
       setMessages(result.data);
       setHasMore(result.hasMore);
-      setOffset(result.nextOffset);
+      setWeeksBack(result.nextWeeksBack);
     } catch (err) {
       console.error("❌ [CLIENT] שגיאה בטעינת הודעות:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch messages");
@@ -52,14 +53,15 @@ export default function Home() {
     fetchMessages();
   }, []);
 
-  // Load more messages (for infinite scroll)
+  // Load more messages (fetch previous week)
   const loadMore = async () => {
     if (!hasMore || isLoadingMore) return;
     
     try {
       setIsLoadingMore(true);
       
-      const response = await fetch(`/api/messages?limit=300&offset=${offset}`);
+      // Fetch the next week back in time
+      const response = await fetch(`/api/messages?weeksBack=${weeksBack}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -70,10 +72,10 @@ export default function Home() {
       
       const result = await response.json();
       
-      // Append new messages to existing ones
+      // Append new week's messages to existing ones
       setMessages((prev) => [...prev, ...result.data]);
       setHasMore(result.hasMore);
-      setOffset(result.nextOffset);
+      setWeeksBack(result.nextWeeksBack);
     } catch (err) {
       console.error("❌ [CLIENT] שגיאה בטעינת הודעות נוספות:", err);
       // Don't set error state for loadMore failures, just log them
@@ -85,7 +87,7 @@ export default function Home() {
   // Handle refresh
   const handleRefresh = () => {
     setIsRefreshing(true);
-    setOffset(0);
+    setWeeksBack(0); // Reset to current week
     setHasMore(true);
     fetchMessages();
   };

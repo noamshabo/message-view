@@ -48,23 +48,36 @@ export async function GET(request: NextRequest) {
 
     // Parse query params
     const searchParams = request.nextUrl.searchParams;
-    const requestedLimit = searchParams.get("limit") || "300"; // Default 300 (3 pages)
-    const requestedOffset = searchParams.get("offset") || "0";
+    const requestedLimit = searchParams.get("limit") || "1000"; // High limit to get full week
     const conversationId = searchParams.get("conversationId");
     const whereParam = searchParams.get("where");
+    
+    // Week-based pagination: weeksBack=0 means current week, weeksBack=1 means last week, etc.
+    const weeksBackParam = searchParams.get("weeksBack") || "0";
+    const weeksBack = parseInt(weeksBackParam);
 
     // Build NocoDB API URL - Correct format for NocoDB Cloud
     const baseUrl = NC_BASE_URL.replace(/\/$/, ""); // Remove trailing slash
     
+    // Calculate date range for the requested week (for client-side filtering)
+    // Week 0 = current week (last 7 days from now)
+    // Week 1 = week before that (8-14 days ago)
+    // Week 2 = week before that (15-21 days ago), etc.
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() - (weeksBack * 7));
+    
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 7);
+    
     // NocoDB returns 100 records per request by default
-    // We'll fetch multiple batches (3×100=300) to reduce number of requests
-    const NOCODB_PAGE_SIZE = 100; // NocoDB's default page size
+    // We'll fetch multiple batches to get the full week
+    const NOCODB_PAGE_SIZE = 100;
     const desiredRecords = parseInt(requestedLimit);
-    const startOffset = parseInt(requestedOffset);
     const batches = Math.ceil(desiredRecords / NOCODB_PAGE_SIZE);
     
     let allRecords: NocoDBRecord[] = [];
-    let currentOffset = startOffset;
+    let currentOffset = 0;
     let hasMoreData = true;
 
     // Fetch records in batches
@@ -79,6 +92,7 @@ export async function GET(request: NextRequest) {
       // NocoDB v2 uses fields for sorting
       apiUrl.searchParams.set("sort", "-CreatedAt"); // Sort by CreatedAt desc
 
+      // Add custom where clause if provided
       if (whereParam) {
         apiUrl.searchParams.set("where", whereParam);
       }
@@ -165,6 +179,14 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Filter by date range (client-side) if NOT requesting a specific conversation
+    if (!conversationId) {
+      messagesWithConvId = messagesWithConvId.filter((msg) => {
+        const msgDate = new Date(msg.CreatedAt);
+        return msgDate >= startDate && msgDate <= endDate;
+      });
+    }
+
     // Filter by conversationId if provided
     if (conversationId) {
       messagesWithConvId = messagesWithConvId.filter(
@@ -172,11 +194,16 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Return data with metadata for pagination
+    // Return data with metadata for week-based pagination
     return NextResponse.json({
       data: messagesWithConvId,
-      hasMore: hasMoreData,
-      nextOffset: currentOffset,
+      hasMore: conversationId ? false : (messagesWithConvId.length > 0), // No pagination for specific conversation
+      nextWeeksBack: weeksBack + 1, // Next request should fetch the previous week
+      currentWeek: weeksBack,
+      dateRange: conversationId ? null : {
+        start: startDate.toISOString(),
+        end: endDate.toISOString()
+      },
       count: messagesWithConvId.length,
     });
   } catch (error) {

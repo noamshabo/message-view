@@ -16,17 +16,19 @@ export default function ConversationPage() {
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Pagination state
-  const [hasMore, setHasMore] = useState(true);
+  // Week-based pagination state (not really used for specific conversation view)
+  const [hasMore, setHasMore] = useState(false); // False by default - we fetch all messages at once
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const [weeksBack, setWeeksBack] = useState(0);
 
   // Fetch messages from API (initial load)
   const fetchMessages = async () => {
     try {
       setError(null);
       
-      const response = await fetch("/api/messages?limit=300&offset=0");
+      // Fetch ALL messages for this specific conversation (no time limit)
+      // We pass a very high weeksBack value to get all historical data
+      const response = await fetch("/api/messages?weeksBack=0&conversationId=" + encodeURIComponent(conversationId));
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -38,8 +40,8 @@ export default function ConversationPage() {
       const result = await response.json();
       
       setMessages(result.data);
-      setHasMore(result.hasMore);
-      setOffset(result.nextOffset);
+      // For specific conversation, we load all messages at once (no pagination)
+      setHasMore(false);
     } catch (err) {
       console.error("❌ [CLIENT] שגיאה בטעינת הודעות:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch messages");
@@ -49,14 +51,15 @@ export default function ConversationPage() {
     }
   };
 
-  // Load more messages
+  // Load more messages (fetch previous week)
   const loadMore = async () => {
     if (!hasMore || isLoadingMore) return;
     
     try {
       setIsLoadingMore(true);
       
-      const response = await fetch(`/api/messages?limit=300&offset=${offset}`);
+      // Fetch the next week back in time for this specific conversation
+      const response = await fetch(`/api/messages?weeksBack=${weeksBack}&conversationId=${encodeURIComponent(conversationId)}`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -64,9 +67,10 @@ export default function ConversationPage() {
       
       const result = await response.json();
       
+      // Append new week's messages to existing ones
       setMessages((prev) => [...prev, ...result.data]);
       setHasMore(result.hasMore);
-      setOffset(result.nextOffset);
+      setWeeksBack(result.nextWeeksBack);
     } catch (err) {
       console.error("❌ [CLIENT] שגיאה בטעינת הודעות נוספות:", err);
     } finally {
@@ -82,8 +86,6 @@ export default function ConversationPage() {
   // Handle refresh
   const handleRefresh = () => {
     setIsRefreshing(true);
-    setOffset(0);
-    setHasMore(true);
     fetchMessages();
   };
 
