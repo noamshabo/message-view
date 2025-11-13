@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Message } from "@/types";
 import ConversationsList from "@/components/ConversationsList";
 import Chat from "@/components/Chat";
-import UserMenu from "@/components/UserMenu";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -114,59 +113,7 @@ export default function Home() {
     : null;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-purple-50 to-gray-100" dir="rtl">
-      {/* Header */}
-      <header className="gradient-header shadow-modern-lg flex-shrink-0">
-        <div className="px-3 md:px-6 py-3 md:py-5 flex items-center justify-between">
-          <div className="flex items-center space-x-2 md:space-x-3 space-x-reverse">
-            {/* Back button on mobile when chat is open */}
-            {showMobileChat && (
-              <button
-                onClick={handleBackToList}
-                className="md:hidden w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm hover:bg-white/30 transition-all"
-              >
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-            )}
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-            </div>
-            <h1 className="text-lg md:text-2xl font-bold text-white drop-shadow-lg">
-              מערכת שיחות
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <UserMenu />
-            <div className="flex items-center gap-2 md:gap-3">
-              {messages.length > 0 && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-xl text-white text-sm font-medium">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                  <span>{messages.length} הודעות</span>
-                </div>
-              )}
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing || loading}
-                className="px-3 md:px-5 py-2 md:py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none font-medium text-sm md:text-base"
-              >
-                <div className="flex items-center gap-2 md:gap-2.5">
-                  <span className="hidden sm:inline">{isRefreshing ? "מרענן..." : "רענן"}</span>
-                  <svg className={`w-4 h-4 md:w-5 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="flex flex-col h-full overflow-hidden bg-gradient-to-br from-gray-50 via-purple-50 to-gray-100" dir="rtl">
       {/* Error Banner */}
       {error && (
         <div className="bg-gradient-to-r from-red-50 to-pink-50 border-b border-red-200 px-3 md:px-6 py-3 md:py-4 animate-slide-in flex-shrink-0">

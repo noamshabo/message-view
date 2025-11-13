@@ -1,0 +1,37 @@
+/**
+ * עיצוב RTL גלובלי
+ */
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: start;
+}
+
+/* כפתורים */
+[dir="rtl"] button {
+  text-align: center;
+}
+
+/* inputs */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+/* flexbox */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* margins */
+[dir="rtl"] .ml-auto {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-left: auto;
+  margin-right: 0;
+}
+

@@ -13,3 +13,8 @@ export type Message = {
   conversation_id: string;
 };
 
+// Export calendar types
+export * from './types/event.types';
+export * from './types/calendar.types';
+export * from './types/outlook.types';
+

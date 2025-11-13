@@ -1,0 +1,299 @@
+/**
+ * עיצוב CalendarView עם התאמות RTL
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+
+.calendar-container {
+  height: 100%; /* גובה מלא של main */
+  display: flex;
+  flex-direction: column;
+  background: #FAFBFC;
+  font-family: 'Heebo', sans-serif;
+  overflow: hidden;
+}
+
+.calendar-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* התאמות RTL ל-React Big Calendar */
+.rbc-calendar {
+  direction: rtl !important;
+  font-family: 'Heebo', sans-serif !important;
+}
+
+.rbc-header {
+  padding: 12px 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1F2937;
+  border-bottom: 2px solid #E5E7EB !important;
+  background: #F9FAFB;
+  text-align: center !important;
+  width: auto !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+.rbc-time-view {
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+.rbc-time-header {
+  direction: rtl !important;
+  display: flex !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+}
+
+.rbc-time-header-gutter {
+  order: 1 !important; /* בצד ימין ב-RTL */
+}
+
+.rbc-time-header > .rbc-time-header-content {
+  flex: 1 !important;
+  display: flex !important;
+  order: 2 !important; /* בצד שמאל ב-RTL */
+}
+
+/* תיקון יישור עמודת השעות */
+.rbc-time-gutter,
+.rbc-time-header-gutter {
+  width: 65px !important;
+  flex: 0 0 65px !important;
+  min-width: 65px !important;
+  max-width: 65px !important;
+  flex-shrink: 0 !important;
+}
+
+.rbc-time-header-gutter {
+  background: #F9FAFB !important;
+  border-bottom: 2px solid #E5E7EB !important;
+  position: relative !important;
+}
+
+.rbc-time-header-gutter::before {
+  content: 'שעות';
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  font-weight: 600;
+  font-size: 14px;
+  color: #1F2937;
+  text-align: right;
+}
+
+/* יישור השעות לימין */
+.rbc-label {
+  text-align: right !important;
+  padding-right: 8px !important;
+}
+
+.rbc-time-content {
+  border-top: 1px solid #E5E7EB;
+  display: flex !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  direction: rtl !important;
+}
+
+.rbc-time-content > .rbc-time-gutter {
+  order: 1 !important; /* בצד ימין ב-RTL */
+}
+
+.rbc-time-content > .rbc-day-slot,
+.rbc-time-content > .rbc-time-column {
+  display: flex !important;
+  flex-direction: column !important;
+  order: 2 !important; /* בצד שמאל ב-RTL */
+}
+
+.rbc-timeslot-group {
+  min-height: 60px;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #F3F4F6;
+}
+
+.rbc-day-slot {
+  border-right: 1px solid #E5E7EB !important;
+  border-left: none !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+.rbc-day-slot:first-child {
+  border-right: none !important;
+}
+
+/* וידוא שכל העמודות באותו גודל */
+.rbc-time-header-content {
+  display: flex !important;
+  flex: 1 !important;
+}
+
+.rbc-allday-cell {
+  display: none !important;
+}
+
+.rbc-day-bg {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+/* כל עמודת יום צריכה להיות באותו גודל */
+.rbc-time-column {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  border-right: 1px solid #E5E7EB !important;
+  border-left: none !important;
+}
+
+.rbc-time-column:first-child {
+  border-right: none !important;
+}
+
+/* תיקון קווי הפרדה בין הימים - מיושר עם הכותרות */
+.rbc-time-content > * + * > * {
+  border-right: 1px solid #E5E7EB !important;
+  border-left: none !important;
+}
+
+/* תיקון יישור הכותרות עם התוכן */
+.rbc-time-header-content {
+  border-right: 1px solid #E5E7EB !important;
+}
+
+/* וידוא שעמודות הימים מיושרות */
+.rbc-header + .rbc-header {
+  border-right: 1px solid #E5E7EB !important;
+  border-left: none !important;
+}
+
+/* שורת הכותרות - חלוקה שווה */
+.rbc-row {
+  display: flex !important;
+  flex: 1 !important;
+}
+
+.rbc-row > * {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+.rbc-row-bg {
+  display: flex !important;
+  flex: 1 !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.rbc-row-content {
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 1 !important;
+}
+
+.rbc-current-time-indicator {
+  background-color: #EF4444;
+  height: 2px;
+}
+
+.rbc-event {
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.rbc-event:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px);
+}
+
+.rbc-event-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.rbc-event-content {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.rbc-time-column {
+  direction: ltr;
+}
+
+/* סגנון השעות - כבר מוגדר למעלה */
+
+/* התאמת גלילה */
+.rbc-time-content {
+  scrollbar-width: thin;
+  scrollbar-color: #D1D5DB #F3F4F6;
+}
+
+.rbc-time-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rbc-time-content::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+.rbc-time-content::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+
+.rbc-time-content::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Today highlighting */
+.rbc-today {
+  background-color: #EEF2FF !important;
+}
+
+/* אנימציות */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-wrapper {
+  animation: slideIn 0.3s ease-out;
+}
+

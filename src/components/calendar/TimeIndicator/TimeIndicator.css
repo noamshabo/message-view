@@ -1,0 +1,57 @@
+/**
+ * עיצוב סמן זמן נוכחי
+ */
+
+.time-indicator {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.time-indicator-dot {
+  position: absolute;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  background: #EF4444;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.time-indicator-line {
+  flex: 1;
+  height: 2px;
+  background: #EF4444;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+}
+
+.time-indicator-label {
+  position: absolute;
+  right: 16px;
+  top: -10px;
+  background: #EF4444;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+

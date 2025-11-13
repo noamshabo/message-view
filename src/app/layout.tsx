@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
+import NavigationBar from "@/components/NavigationBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,7 +26,12 @@ export default async function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <SessionProvider session={session}>
-          {children}
+          <div className="flex flex-col h-screen overflow-hidden">
+            <NavigationBar />
+            <main className="flex-1 overflow-hidden">
+              {children}
+            </main>
+          </div>
         </SessionProvider>
       </body>
     </html>
