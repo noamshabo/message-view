@@ -5,7 +5,8 @@ import Google from "next-auth/providers/google";
 const ALLOWED_EMAILS = [
   "noamshabo1@gmail.com",
   "elad@bizsuccess.co.il",
-  "hadarelad@gmail.com"// החלף בכתובות האימייל שלך
+  "m.office.success@gmail.com",
+  "hadarelad@gmail.com", // החלף בכתובות האימייל שלך
   // הוסף עוד אימיילים כאן
 ];
 
@@ -22,7 +23,7 @@ export const authConfig = {
       if (user.email && ALLOWED_EMAILS.includes(user.email)) {
         return true;
       }
-      
+
       // אם האימייל לא ברשימה, מנע כניסה
       return false;
     },
@@ -42,14 +43,14 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isOnConversation = nextUrl.pathname.startsWith("/conversation");
       const isOnHome = nextUrl.pathname === "/";
-      
+
       if (isOnConversation || isOnHome) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
       } else if (isLoggedIn) {
         return true;
       }
-      
+
       return true;
     },
   },
@@ -57,4 +58,3 @@ export const authConfig = {
     signIn: "/auth/signin",
   },
 } satisfies NextAuthConfig;
-
